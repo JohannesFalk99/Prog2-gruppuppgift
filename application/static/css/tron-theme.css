@@ -1,0 +1,419 @@
+html, body {
+  height: 100vh;
+  overflow: hidden;
+}
+/* tron-theme.css - Minimal Tron theme customizations for Bootstrap */
+
+:root {
+  --tron-primary: #1de9b6;
+  --tron-secondary: #00e5ff;
+  --tron-accent: #e91db6;
+  --tron-warning: #ffe500;
+  --tron-dark: #0c1117;
+  --tron-darker: #16202b;
+  --tron-light: #eaf6ff;
+}
+
+/* Tron Background Animations */
+@keyframes tronBackgroundShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Body backgrounds for different pages */
+body.body-dashboard {
+  background: linear-gradient(135deg, #001f29, #003c47, #001f29);
+  background-size: 400% 400%;
+}
+
+body.body-data {
+  background: linear-gradient(135deg, #1a0029, #380057, #1a0029);
+  background-size: 400% 400%;
+}
+
+body.body-profile {
+  background: linear-gradient(135deg, #001c1a, #004f45, #001c1a);
+  background-size: 400% 400%;
+}
+
+body.body-settings {
+  background: linear-gradient(135deg, #191919, #333333, #191919);
+  background-size: 400% 400%;
+}
+
+body.body-home {
+  background: linear-gradient(135deg, #0a0f15, #09131c, #0a0f15);
+  background-size: 400% 400%;
+}
+
+/* Tron grid overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -1;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,255,255,0.12) 0px, rgba(0,255,255,0.22) 2px, transparent 2px, transparent 60px),
+      repeating-linear-gradient(90deg, rgba(0,255,255,0.12) 0px, rgba(0,255,255,0.22) 2px, transparent 2px, transparent 60px);
+    box-shadow: 0 0 32px 4px rgba(0,255,255,0.08) inset;
+    filter: drop-shadow(0 0 8px #00e5ff);
+    animation: tronNetCounter 9s linear infinite, tronNetClockwise 11s linear infinite;
+    background-size: 60px 60px, 60px 60px;
+    background-position: 0 0, 0 0;
+}
+
+@keyframes tronNetCounter {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: -120px 120px, -120px 120px;
+  }
+}
+
+@keyframes tronNetClockwise {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 120px -120px, 120px -120px;
+  }
+}
+
+/* Bootstrap overrides for Tron theme */
+body {
+  color: var(--tron-light);
+  transition: background 0.6s ease;
+  border: 2px dashed #e91db6 !important; /* DEBUG: Remove after testing */
+}
+
+/* Custom Bootstrap color classes */
+.bg-tron-primary { background-color: var(--tron-primary) !important; }
+.bg-tron-secondary { background-color: var(--tron-secondary) !important; }
+.bg-tron-accent { background-color: var(--tron-accent) !important; }
+.bg-tron-warning { background-color: var(--tron-warning) !important; }
+.bg-tron-dark { background-color: var(--tron-dark) !important; }
+.bg-tron-darker { background-color: var(--tron-darker) !important; }
+
+.text-tron-primary { color: var(--tron-primary) !important; }
+.text-tron-secondary { color: var(--tron-secondary) !important; }
+.text-tron-accent { color: var(--tron-accent) !important; }
+.text-tron-warning { color: var(--tron-warning) !important; }
+.text-tron-light { color: var(--tron-light) !important; }
+
+.border-tron-primary { border-color: var(--tron-primary) !important; }
+.border-tron-secondary { border-color: var(--tron-secondary) !important; }
+.border-tron-accent { border-color: var(--tron-accent) !important; }
+
+/* Custom button styles */
+.btn-tron-primary {
+  background: linear-gradient(135deg, var(--tron-primary), var(--tron-secondary));
+  border: none;
+  color: var(--tron-dark);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.btn-tron-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(29,233,182,0.4);
+  color: var(--tron-dark);
+}
+
+.btn-tron-outline {
+  background: transparent;
+  border: 1px solid var(--tron-accent);
+  color: var(--tron-accent);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.btn-tron-outline:hover {
+  background: rgba(233,29,182,0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(233,29,182,0.3);
+  color: var(--tron-accent);
+}
+
+/* Card customizations */
+.card-tron {
+  background-color: var(--tron-darker);
+  border: 1px solid rgba(29,233,182,0.2);
+  box-shadow: 0 2px 12px rgba(29,233,182,0.1);
+  color: var(--tron-light);
+}
+
+.card-tron .card-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--tron-primary);
+  color: var(--tron-primary);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Form customizations */
+.form-control-tron {
+  background-color: var(--tron-dark);
+  border: 1px solid var(--tron-primary);
+  color: var(--tron-light);
+}
+
+.form-control-tron:focus {
+  background-color: var(--tron-dark);
+  border-color: var(--tron-secondary);
+  box-shadow: 0 0 10px rgba(0,229,255,0.3);
+  color: var(--tron-light);
+}
+
+/* Navigation customizations - Original Tron Style */
+.navbar-tron {
+  background-color: var(--tron-dark);
+  border-top: 1px solid rgba(0, 255, 255, 0.25);
+  box-shadow: 0 -1px 12px rgba(0, 255, 255, 0.05);
+  height: 78px;
+  z-index: 100;
+  overflow: hidden;
+  padding: 0 0.5rem;
+  transition: background 0.6s;
+}
+
+body.body-dashboard .navbar-tron {
+  background-color: #003c47;
+}
+body.body-data .navbar-tron {
+  background-color: #380057;
+}
+body.body-profile .navbar-tron {
+  background-color: #004f45;
+}
+body.body-settings .navbar-tron {
+  background-color: #333333;
+}
+body.body-home .navbar-tron {
+  background-color: #09131c;
+}
+
+.navbar-tron .navbar-nav {
+  width: 100%;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.navbar-tron .nav-item {
+  flex: 1 1 0;
+  text-align: center;
+}
+
+.nav-link-tron {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: rgba(0, 255, 255, 0.55);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+  padding: 0.4rem 0.5rem;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.nav-link-tron i,
+.nav-link-tron svg {
+  font-size: 1.4rem;
+  margin-bottom: 3px;
+  transition: all 0.3s ease;
+}
+
+.nav-link-tron:hover,
+.nav-link-tron.active {
+  color: var(--tron-secondary);
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+}
+
+.nav-link-tron:hover i,
+.nav-link-tron.active i,
+.nav-link-tron:hover svg,
+.nav-link-tron.active svg {
+  color: var(--tron-secondary);
+  filter: drop-shadow(0 0 4px rgba(0, 255, 255, 0.6));
+}
+
+.nav-link-tron.active {
+  background: rgba(0, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.15) inset;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+/* Center "Home" slightly elevated */
+#nav-home {
+  transform: translateY(-6px);
+}
+
+/* Tron underline animation for active tab */
+.nav-link-tron::after {
+  content: '';
+  display: block;
+  width: 0;
+    animation: tronNetMove 32s ease-in-out infinite, tronNetMoveReverse 40s ease-in-out infinite;
+  margin: 6px auto 0;
+  background: var(--tron-secondary);
+  border-radius: 4px;
+  transition: width 0.25s ease;
+  overflow: hidden;
+}
+
+.nav-link-tron.active::after,
+.nav-link-tron:hover::after {
+  width: 28px;
+}
+
+/* Content transitions - Smooth fade-in */
+.content-transition {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.6s ease-out;
+  filter: blur(1px);
+}
+
+.content-transition.loaded {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+.loading {
+  opacity: 0.3;
+  pointer-events: none;
+  transform: scale(0.98);
+  filter: blur(2px);
+}
+
+/* Smooth fade-in animation for content */
+@keyframes smoothFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.content-fade-in {
+  animation: smoothFadeIn 0.8s ease-out forwards;
+}
+
+/* Staggered fade-in for cards */
+.card-fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: cardFadeIn 0.6s ease-out forwards;
+}
+
+.card-fade-in:nth-child(1) { animation-delay: 0.1s; }
+.card-fade-in:nth-child(2) { animation-delay: 0.2s; }
+.card-fade-in:nth-child(3) { animation-delay: 0.3s; }
+.card-fade-in:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes cardFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(25px);
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Chart container */
+.chart-container {
+  background-color: var(--tron-darker);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(29,233,182,0.1);
+  padding: 1.5rem;
+}
+
+/* Main content spacing */
+#main-content {
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-tron {
+    height: 70px;
+  }
+  
+  .nav-link-tron {
+    font-size: 0.7rem;
+    padding: 0.3rem 0;
+  }
+  
+  .nav-link-tron i,
+  .nav-link-tron svg {
+    font-size: 1.2rem;
+  }
+  
+  #nav-home {
+    transform: translateY(-4px);
+  }
+  
+  #main-content {
+    padding: 1rem 0.5rem 6rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-tron {
+    height: 65px;
+  }
+  
+  .nav-link-tron {
+    font-size: 0.65rem;
+    gap: 2px;
+  }
+  
+  .nav-link-tron i,
+  .nav-link-tron svg {
+    font-size: 1rem;
+  }
+  
+  .nav-link-tron::after {
+    height: 1px;
+  }
+  
+  .nav-link-tron.active::after,
+  .nav-link-tron:hover::after {
+    width: 20px;
+  }
+  
+  #main-content {
+    padding: 0.5rem 0.25rem 6rem 0.25rem;
+  }
+}
