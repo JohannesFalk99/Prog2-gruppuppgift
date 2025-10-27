@@ -1,37 +1,28 @@
-#App.py for flask
-#__init__.py
-from flask import Flask, render_template
-from endpoints import route_blueprint
+import flask
+from flask import Flask, jsonify, render_template
 
 app = Flask(__name__)
-app.register_blueprint(route_blueprint)
 
 @app.route('/')
-def index():
+
+def home():
     return render_template('index.html')
 
-# Map /index and /index.html to the existing index view
-app.add_url_rule('/index', endpoint='index', view_func=index)
-app.add_url_rule('/index.html', endpoint='index', view_func=index)
+@app.route('/data')
+def data():
+    return render_template('data.html')
 
-#map error pages
-app.add_url_rule('/404', endpoint='not_found', view_func=lambda: render_template('404.html'), methods=['GET'])
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
 
-@app.route('/401')
-def unauthorized():
-    return render_template('401.html'), 401
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
 
-@app.route('/500')
-def server_error():
-    return render_template('500.html'), 500
-
-#tables
-
-@app.route('/tables')
-def tables():
-    return render_template('tables.html')
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
-    

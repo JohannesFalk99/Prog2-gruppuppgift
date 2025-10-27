@@ -1,0 +1,99 @@
+{% block content %}
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+  <div class="container-fluid">
+    <div class="row g-4">
+      <!-- Left Panel: Stats -->
+      <div class="col-lg-6">
+        <div class="card card-tron h-100">
+          <div class="card-header">
+            <h2 class="mb-0">Dashboard</h2>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="card bg-tron-primary bg-opacity-10 border-tron-primary text-center p-3 card-fade-in">
+                  <h3 class="text-tron-primary display-6 mb-1">42</h3>
+                  <p class="text-tron-light mb-0 small">Total Users</p>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="card bg-tron-secondary bg-opacity-10 border-tron-secondary text-center p-3 card-fade-in">
+                  <h3 class="text-tron-secondary display-6 mb-1">156</h3>
+                  <p class="text-tron-light mb-0 small">Data Points</p>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="card bg-tron-accent bg-opacity-10 border-tron-accent text-center p-3 card-fade-in">
+                  <h3 class="text-tron-accent display-6 mb-1">89%</h3>
+                  <p class="text-tron-light mb-0 small">Uptime</p>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="card bg-tron-warning bg-opacity-10 border-tron-warning text-center p-3 card-fade-in">
+                  <h3 class="text-tron-warning display-6 mb-1">24/7</h3>
+                  <p class="text-tron-light mb-0 small">Support</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Panel: Activity Chart -->
+      <div class="col-lg-6">
+        <div class="card card-tron h-100">
+          <div class="card-header">
+            <h2 class="mb-0">Activity</h2>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="dashboardChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <script>
+        const ctx = document.getElementById('dashboardChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+              label: 'Activity',
+              data: [12, 19, 3, 5, 2, 3, 8],
+              borderColor: '#1de9b6',
+              backgroundColor: 'rgba(29,233,182,0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true,
+                labels: { color: '#eaf6ff', font: { weight: 'bold' } }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { color: '#eaf6ff' },
+                grid: { color: 'rgba(29,233,182,0.2)' }
+              },
+              x: {
+                ticks: { color: '#eaf6ff' },
+                grid: { color: 'rgba(29,233,182,0.2)' }
+              }
+            }
+          }
+        });
+      </script>
+    </div>
+  </div>
+</div>
+{% endblock %}

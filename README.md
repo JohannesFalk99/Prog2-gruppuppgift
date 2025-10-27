@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Prog2-gruppuppgift
 
 API:t ska använda JSON för all datakommunikation.
@@ -20,3 +21,8 @@ Skapa följande fil- och mappstruktur:
 • templates
 • tests
 • docs
+=======
+# Group Project Test Website
+
+This is a test web site for my group project.
+>>>>>>> grupp_test/main

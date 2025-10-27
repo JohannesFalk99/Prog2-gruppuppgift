@@ -1,0 +1,52 @@
+{% block content %}
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+  <div class="container-fluid">
+    <div class="row g-4">
+      <!-- Data Table -->
+      <div class="col-lg-6">
+        <div class="card card-tron h-100">
+          <div class="card-header">
+            <h2 class="mb-0">Data</h2>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover">
+                <thead class="table-dark">
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Value</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>1</td><td>Alpha</td><td>4567</td><td><span class="badge bg-success">Active</span></td></tr>
+                  <tr><td>2</td><td>Beta</td><td>3421</td><td><span class="badge bg-warning">Pending</span></td></tr>
+                  <tr><td>3</td><td>Gamma</td><td>5892</td><td><span class="badge bg-success">Active</span></td></tr>
+                  <tr><td>4</td><td>Delta</td><td>2156</td><td><span class="badge bg-secondary">Inactive</span></td></tr>
+                  <tr><td>5</td><td>Epsilon</td><td>7234</td><td><span class="badge bg-success">Active</span></td></tr>
+                  <tr><td>6</td><td>Zeta</td><td>4123</td><td><span class="badge bg-warning">Pending</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chart -->
+      <div class="col-lg-6">
+        <div class="card card-tron h-100">
+          <div class="card-header">
+            <h2 class="mb-0">Chart</h2>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="dataChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% block content %}
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+  <div class="container-fluid">
+    <div class="row g-4">
+      <!-- Left Panel: User Info -->
+      <div class="col-lg-6">
+        <div class="card card-tron h-100">
+          <div class="card-header">
+            <h2 class="mb-0">User</h2>
+          </div>
+          <div class="card-body">
+            <div class="mb-4">
+              <h5 class="text-tron-secondary mb-3">Profile Information</h5>
+              <div class="row">
+                <div class="col-sm-4"><strong class="text-tron-primary">Name:</strong></div>
+                <div class="col-sm-8 text-tron-light">Tommy Tron</div>
+                <div class="col-sm-4"><strong class="text-tron-primary">Email:</strong></div>
+                <div class="col-sm-8 text-tron-light">tommy@example.com</div>
+                <div class="col-sm-4"><strong class="text-tron-primary">Joined:</strong></div>
+                <div class="col-sm-8 text-tron-light">2025-01-01</div>
+              </div>
+            </div>
+            
+            <hr class="border-tron-primary">
+            
+            <div class="mb-4">
+              <h5 class="text-tron-secondary mb-3">Activity</h5>
+              <ul class="list-unstyled">
+                <li class="mb-2"><i class="bi bi-check-circle text-tron-primary me-2"></i>Logged in: 42 times</li>
+                <li class="mb-2"><i class="bi bi-clock text-tron-secondary me-2"></i>Last login: 2025-10-22</li>
+                <li class="mb-2"><i class="bi bi-database text-tron-accent me-2"></i>Data entries: 6</li>
+              </ul>
+            </div>
+            
+            <hr class="border-tron-primary">
+            
+            <div>
+              <h5 class="text-tron-secondary mb-3">Pricing</h5>
+              <div class="row">
+                <div class="col-sm-4"><strong class="text-tron-primary">Plan:</strong></div>
+                <div class="col-sm-8 text-tron-light">Pro</div>
+                <div class="col-sm-4"><strong class="text-tron-primary">Renewal:</strong></div>
+                <div class="col-sm-8 text-tron-light">2026-01-01</div>
+                <div class="col-sm-4"><strong class="text-tron-primary">Status:</strong></div>
+                <div class="col-sm-8"><span class="badge bg-success">Active</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Panel: Pie Chart -->
+      <div class="col-lg-6">
+        <div class="card card-tron h-100">
+          <div class="card-header">
+            <h2 class="mb-0">Usage</h2>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="profilePieChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+        const ctx = document.getElementById('profilePieChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: ['Data', 'Analytics', 'Setup', 'Other'],
+            datasets: [{
+              label: 'Usage',
+              data: [40, 30, 20, 10],
+              backgroundColor: [
+                'rgba(29,233,182,0.7)',
+                'rgba(0,229,255,0.7)',
+                'rgba(233,29,182,0.7)',
+                'rgba(255,229,0,0.7)'
+              ],
+              borderColor: 'rgba(29,233,182,1)',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true,
+                labels: { color: '#eaf6ff', font: { weight: 'bold' } }
+              },
+              title: {
+                display: true,
+                text: 'Usage Breakdown',
+                color: '#1de9b6',
+                font: { size: 18 }
+              }
+            }
+          }
+        });
+      </script>
+    </div>
+  </div>
+</div>
+{% endblock %}
