@@ -1,5 +1,6 @@
 import uuid
-from flask import request, make_response, redirect, url_for
+from functools import wraps 
+from flask import request, make_response, redirect, url_for, abort 
 
 def set_cookie(response, key, value, days_expire=365):
     max_age = days_expire * 24 * 60 * 60
@@ -31,3 +32,14 @@ def accept_cookies():
 def decline_cookies():
     resp = make_response(redirect(url_for("index")))
     return set_cookie(resp, "consent", "false", days_expire=365)
+
+def require_admin(f):
+    """Decorator som spärrar endpoints om inte rätt admin-lösenord anges"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Hämta lösenord från query eller cookie
+        password = request.args.get("password") or request.cookies.get("admin_auth")
+        if password != "123":   # byt till något säkrare i skarp miljö
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function

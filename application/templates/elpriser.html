@@ -84,6 +84,37 @@
         </div>
     </div>
   </div>
+
+  <!-- Display Annotations Section -->
+  <!-- <div id="annotations-section"> -->
+  <!--     <h3>Annotations for {{ date }} - {{ area }}</h3> -->
+      
+  <!--     <!-- Add New Annotation Form --> -->
+  <!--     <form id="add-annotation-form"> -->
+  <!--         <textarea id="annotation-text" placeholder="Add your annotation..." required></textarea> -->
+  <!--         <input type="text" id="annotation-author" placeholder="Your name (optional)"> -->
+  <!--         <button type="submit">Add Annotation</button> -->
+  <!--     </form> -->
+      
+  <!--     <!-- Display Existing Annotations --> -->
+  <!--     <div id="annotations-list"> -->
+  <!--         {% for ann in annotations %} -->
+  <!--         <div class="annotation" data-id="{{ ann.id }}"> -->
+  <!--             <p><strong>{{ ann.author }}:</strong> {{ ann.text }}</p> -->
+  <!--             <small>{{ ann.created_at }}</small> -->
+  <!--             <div class="votes"> -->
+  <!--                 <button class="vote-btn" data-vote="like">👍 {{ ann.likes }}</button> -->
+  <!--                 <button class="vote-btn" data-vote="dislike">👎 {{ ann.dislikes }}</button> -->
+  <!--             </div> -->
+  <!--             {% if ann.status == 'warning' %} -->
+  <!--             <span class="warning">⚠️ Warning</span> -->
+  <!--             {% elif ann.status == 'removed' %} -->
+  <!--             <span class="removed">🚫 Removed</span> -->
+  <!--             {% endif %} -->
+  <!--         </div> -->
+  <!--         {% endfor %} -->
+  <!--     </div> -->
+  <!-- </div> -->
 </div>
 
 <!-- Chart.js (CDN) -->
@@ -401,6 +432,5 @@ document.getElementById('btnAddAnnotation').addEventListener('click', async () =
     console.error('Add annotation error', e);
   }
 });
-
 </script>
 {% endblock %}

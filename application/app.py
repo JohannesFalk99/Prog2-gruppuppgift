@@ -1,100 +1,128 @@
 import importlib
-from flask import Flask, render_template, request, make_response
-import pandas_test
-import cookies_test as ct
-
-app = Flask(__name__)
-
-# How to use blueprints:
-# - Create a module `endpoints.py` next to this file.
-# - In that module export a Blueprint named `bp`, e.g.:
-#     from flask import Blueprint, render_template
-#     bp = Blueprint('endpoints', __name__)
-#     @bp.route('/data')
-#     def data(): return render_template('data.html')
-# - This app will automatically import `endpoints` and register `bp`.
-
-# Register endpoints from endpoints.py (supports Blueprint 'bp' or function 'register_routes'
-# or module-level route decorators). Tries relative import first, then absolute.
+from flask import Flask
+from pathlib import Path
 try:
-	# same-package import (when application is a package)
-	from . import endpoints as _endpoints
-except Exception:
-	try:
-		import endpoints as _endpoints
-	except Exception:
-		_endpoints = None
+    # prefer package-relative import when running as a package
+    from .endpoints import require_admin
+except ImportError:
+    # fallback for direct script execution
+    from endpoints import require_admin
 
-if _endpoints:
-	if hasattr(_endpoints, 'bp'):
-		app.register_blueprint(_endpoints.bp)
-	elif hasattr(_endpoints, 'register_routes'):
-		_endpoints.register_routes(app)
-	else:
-		# module-level decorators will have been registered on import
-		pass
+try:
+    # prefer package-relative import when running as a package
+    from .config import get_config
+except ImportError:
+    # fallback for direct script execution
+    from config import get_config
 
-	# If endpoints defines a blueprint named 'route_blueprint', register it as well
-	if hasattr(_endpoints, 'route_blueprint'):
-		app.register_blueprint(_endpoints.route_blueprint)
+class Config:
+    """Application configuration class"""
+    SECRET_KEY = 'dev-secret-key-change-in-production'
+    DEBUG = True
+    TESTING = False
 
-@app.route("/")
-def index():
-    consent = ct.has_cookie_consent()
-    user_id = ct.get_cookie("user_id")
-    return render_template("index.html", consent=consent, user_id=user_id)
+    @classmethod
+    def init_app(cls, app):
+        """Initialize application with configuration"""
+        app.config.from_object(cls)
 
-# @app.route('/data')
-# def data():
-#     return render_template('data.html')
+class FlaskApp:
+    """Main Flask application class"""
 
-# @app.route('/profile')
-# def profile():
-#     return render_template('profile.html')
+    def __init__(self, config_class=None):
+        if config_class is None:
+            config_class = get_config()
 
-# @app.route('/dashboard')
-# def dashboard():
-#     return render_template('dashboard.html')
+        self.app = Flask(__name__)
+        config_class.init_app(self.app)
+        self._register_error_handlers()
+        self._register_blueprints()
+        self._register_routes()
 
-#e
+    def _register_error_handlers(self):
+        """Register error handlers"""
+        try:
+            from .error_handlers import ErrorHandler
+        except ImportError:
+            from error_handlers import ErrorHandler
+        ErrorHandler.register_error_handlers(self.app)
 
-# @app.route('/settings')
-# def settings():
-#     return render_template('settings.html')
-#how to use blueprints?
+    def _register_blueprints(self):
+        """Register all blueprints from endpoints module"""
+        try:
+            # Try package-relative import first
+            from . import endpoints as _endpoints
+        except ImportError:
+            # Fallback for direct script execution
+            import endpoints as _endpoints
 
+        # Register blueprints if they exist
+        if hasattr(_endpoints, 'bp'):
+            self.app.register_blueprint(_endpoints.bp)
+        if hasattr(_endpoints, 'route_blueprint'):
+            self.app.register_blueprint(_endpoints.route_blueprint)
 
-# ----- Cookie stuff ----- #
-@app.route("/set")
-def set_cookie():
-    return ct.accept_cookies()
+        # Register routes via function if available
+        if hasattr(_endpoints, 'register_routes'):
+            _endpoints.register_routes(self.app)
 
-@app.route("/get")
-def get_cookie():
-    user_id = request.cookies.get("user_id")
-    return f"user_id = {user_id}" if user_id else "NO cookies claimed!"
+    def _register_routes(self):
+        """Register additional routes directly on the app"""
+        try:
+            from .cookie_manager import CookieManager
+        except ImportError:
+            from cookie_manager import CookieManager
 
-@app.route("/delete")
-def delete_cookie():
-    resp = make_response("Cookie deleted!")
-    resp.delete_cookie("user_id")
-    return resp
+        cookie_manager = CookieManager()
 
-@app.route("/accept_cookies")
-def set_cookie_route():
-    return ct.accept_cookies()
-#Ta bort alla cookies
-@app.route("/decline_cookies")
-def decline_cookies():
-    return ct.decline_cookies()
-#-------------------------------#
+        @self.app.route("/")
+        def index():
+            consent = cookie_manager.has_consent()
+            user_id = cookie_manager.get_user_id()
+            from flask import render_template
+            return render_template("index.html", consent=consent, user_id=user_id)
 
-# ----- pandas test ----- #
-@app.route("/pandas")
-def pandas_view():
-    graph_html = pandas_test.build_chart()   
-    return render_template("pandas.html", graph_html=graph_html)
+        # Cookie routes
+        @self.app.route("/set")
+        def set_cookie():
+            return cookie_manager.accept_cookies()
 
+        @self.app.route("/get")
+        def get_cookie():
+            from flask import request
+            user_id = request.cookies.get("user_id")
+            return f"user_id = {user_id}" if user_id else "NO cookies claimed!"
+
+        @self.app.route("/delete")
+        def delete_cookie():
+            from flask import make_response
+            resp = make_response("Cookie deleted!")
+            resp.delete_cookie("user_id")
+            return resp
+
+        @self.app.route("/accept_cookies")
+        def accept_cookies():
+            return cookie_manager.accept_cookies()
+
+        @self.app.route("/decline_cookies")
+        def decline_cookies():
+            return cookie_manager.decline_cookies()
+
+        # Pandas route
+        @self.app.route("/pandas")
+        def pandas_view():
+            import pandas_test
+            graph_html = pandas_test.build_chart()
+            from flask import render_template
+            return render_template("pandas.html", graph_html=graph_html)
+
+    def run(self, host='127.0.0.1', port=5000, debug=None):
+        """Run the Flask application"""
+        debug = debug if debug is not None else self.app.config['DEBUG']
+        self.app.run(host=host, port=port, debug=debug)
+
+# Create application instance
+app = FlaskApp().app
 
 if __name__ == '__main__':
-	app.run(debug=True)
+    FlaskApp().run()
