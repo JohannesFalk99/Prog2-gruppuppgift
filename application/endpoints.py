@@ -3,8 +3,15 @@ from flask import Blueprint, render_template, current_app
 from pathlib import Path
 import json
 import uuid
-from .services.elpriser_service import ElpriserService
-from .services.annotations_service import AnnotationsService
+
+try:
+    # prefer package-relative import when running as a package
+    from .services.elpriser_service import ElpriserService
+    from .services.annotations_service import AnnotationsService
+except Exception:
+    # fallback for direct script runs
+    from services.elpriser_service import ElpriserService
+    from services.annotations_service import AnnotationsService
 
 try:
     # prefer package-relative import when running as a package

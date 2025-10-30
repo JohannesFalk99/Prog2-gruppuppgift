@@ -67,7 +67,7 @@ def index():
 # ----- Cookie stuff ----- #
 @app.route("/set")
 def set_cookie():
-    return ct.accpet_cookies()
+    return ct.accept_cookies()
 
 @app.route("/get")
 def get_cookie():
@@ -78,7 +78,6 @@ def get_cookie():
 def delete_cookie():
     resp = make_response("Cookie deleted!")
     resp.delete_cookie("user_id")
-	resp.delete:coo
     return resp
 
 @app.route("/accept_cookies")
