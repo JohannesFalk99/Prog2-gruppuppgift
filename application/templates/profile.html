@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-center align-items-center min-vh-100">
   <div class="container-fluid">
@@ -65,44 +67,15 @@
     </div>
   </div>
 </div>
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-      <script>
-        const ctx = document.getElementById('profilePieChart').getContext('2d');
-        new Chart(ctx, {
-          type: 'pie',
-          data: {
-            labels: ['Data', 'Analytics', 'Setup', 'Other'],
-            datasets: [{
-              label: 'Usage',
-              data: [40, 30, 20, 10],
-              backgroundColor: [
-                'rgba(29,233,182,0.7)',
-                'rgba(0,229,255,0.7)',
-                'rgba(233,29,182,0.7)',
-                'rgba(255,229,0,0.7)'
-              ],
-              borderColor: 'rgba(29,233,182,1)',
-              borderWidth: 2
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: {
-                display: true,
-                labels: { color: '#eaf6ff', font: { weight: 'bold' } }
-              },
-              title: {
-                display: true,
-                text: 'Usage Breakdown',
-                color: '#1de9b6',
-                font: { size: 18 }
-              }
-            }
-          }
-        });
-      </script>
-    </div>
-  </div>
-</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  (function(){
+    const el = document.getElementById('profilePieChart');
+    if (!el) return;
+    const ctx = el.getContext('2d');
+    new Chart(ctx, { type:'pie', data:{ labels:['Data','Analytics','Setup','Other'], datasets:[{ data:[40,30,20,10], backgroundColor:['rgba(29,233,182,0.7)','rgba(0,229,255,0.7)','rgba(233,29,182,0.7)','rgba(255,229,0,0.7)'], borderColor:'rgba(29,233,182,1)', borderWidth:2 }] }, options:{ responsive:true } });
+  })();
+</script>
 {% endblock %}

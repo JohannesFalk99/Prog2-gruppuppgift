@@ -1,0 +1,112 @@
+[
+  {
+    "id": "561d7a98-323e-4851-890b-ab22e8f058ec",
+    "date": "2025-10-08",
+    "area": "SE1",
+    "text": "Gay shit",
+    "author": "anonymous",
+    "created_at": "2025-10-29T21:18:42.356870Z",
+    "likes": 0,
+    "dislikes": 0,
+    "status": "active"
+  },
+  {
+    "id": "f02f2be9-7e39-4944-b8d7-0d153a88c47e",
+    "date": "2025-10-08",
+    "area": "SE1",
+    "text": "aga",
+    "author": "anonymous",
+    "created_at": "2025-10-29T21:18:56.234794Z",
+    "likes": 0,
+    "dislikes": 0,
+    "status": "active"
+  },
+  {
+    "id": "da7c61c6-c82b-414f-87a0-b7654d47cd82",
+    "date": "2025-10-08",
+    "area": "SE1",
+    "text": "fafafa",
+    "author": "anonymous",
+    "created_at": "2025-10-29T21:19:06.191391Z",
+    "likes": 0,
+    "dislikes": 0,
+    "status": "active"
+  },
+  {
+    "id": "16b50d54-80b0-4cde-830c-15b7b2a82015",
+    "date": "2025-10-09",
+    "area": "SE3",
+    "text": "gs",
+    "author": "g",
+    "created_at": "2025-10-29T21:20:13.455943Z",
+    "likes": 23,
+    "dislikes": 0,
+    "status": "active"
+  },
+  {
+    "id": "e2912764-0d02-4b83-a2aa-02d2280d31e2",
+    "date": "2025-10-09",
+    "area": "SE3",
+    "text": "dad",
+    "author": "da",
+    "created_at": "2025-10-29T21:21:40.544657Z",
+    "likes": 18,
+    "dislikes": 0,
+    "status": "active"
+  },
+  {
+    "id": "7385232a-c12b-447f-ba5b-c425fffe2b39",
+    "date": "2025-10-09",
+    "area": "SE3",
+    "text": "gaa",
+    "author": "ga",
+    "created_at": "2025-10-29T21:21:49.881758Z",
+    "likes": 10,
+    "dislikes": 0,
+    "status": "active"
+  },
+  {
+    "id": "41139de8-308b-4dc4-9365-f89cff5613ac",
+    "date": "2025-10-09",
+    "area": "SE3",
+    "text": "fafaf",
+    "author": "fa",
+    "created_at": "2025-10-29T21:22:08.570497Z",
+    "likes": 10,
+    "dislikes": 0,
+    "status": "active"
+  },
+  {
+    "id": "b206098b-d739-4500-8bee-4e3f6c8b0462",
+    "date": "2025-10-09",
+    "area": "SE3",
+    "text": "adda",
+    "author": "daa",
+    "created_at": "2025-10-29T21:25:11.061715Z",
+    "likes": 25,
+    "dislikes": 3,
+    "status": "warning"
+  },
+  {
+    "id": "c86fc94d-9e40-4713-9b2c-3b76e17be00e",
+    "date": "2025-10-09",
+    "area": "SE3",
+    "text": "dadadada",
+    "author": "d",
+    "created_at": "2025-10-29T21:25:47.107927Z",
+    "likes": 0,
+    "dislikes": 0,
+    "status": "active"
+  },
+  {
+    "id": "5362e846-655d-46a0-b2ad-c1136cc80cfd",
+    "date": "2025-10-30",
+    "area": "SE3",
+    "text": "Kärnkraften gick ner",
+    "author": "anonymous",
+    "created_at": "2025-10-30T14:47:46.453065Z",
+    "likes": 7,
+    "dislikes": 10,
+    "status": "removed"
+  }
+]
