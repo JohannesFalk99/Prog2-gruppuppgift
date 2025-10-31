@@ -51,3 +51,21 @@ Additional developer notes
 - The project uses class-based views in `application/endpoints.py` and a service layer in `application/services/annotations_service.py`.
 - If you need a migration tool to move JSON annotations into the DB, I can add a safe migration script that checks for duplicates.
 - Tests: there are no unit tests in the repo currently; adding a small pytest suite for the annotations service would be a good next step.
+
+Continuous Integration
+----------------------
+
+A GitHub Actions workflow is added at `.github/workflows/pytest.yml` that runs `pytest` on push and pull requests against `main` on multiple Python versions (3.10–3.12).
+
+To run tests locally before pushing, use PowerShell from the project root:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+pytest -q
+```
+
+If you see SQLAlchemy typing/deprecation warnings, upgrade SQLAlchemy in your venv:
+
+```powershell
+pip install --upgrade SQLAlchemy
+```

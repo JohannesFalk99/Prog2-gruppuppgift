@@ -1,6 +1,8 @@
 import importlib
 from flask import Flask
 from pathlib import Path
+
+
 try:
     # prefer package-relative import when running as a package
     from .endpoints import require_admin
@@ -79,6 +81,11 @@ class FlaskApp:
         def index():
             consent = cookie_manager.has_consent()
             user_id = cookie_manager.get_user_id()
+            # record a page view for this user (if DB available)
+            try:
+                cookie_manager.record_view()
+            except Exception:
+                pass
             from flask import render_template
             return render_template("index.html", consent=consent, user_id=user_id)
 

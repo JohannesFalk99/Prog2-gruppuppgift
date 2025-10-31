@@ -42,8 +42,11 @@ class AnnotationsService:
         except Exception:
             return False
 
-    def list(self, date=None, area=None):
-        """List annotations with optional filters"""
+    def list(self, date=None, area=None, user_id=None):
+        """List annotations with optional filters.
+
+        If user_id is supplied, only annotations created by that user_id are returned.
+        """
         if self.use_db:
             try:
                 sess = get_session()
@@ -52,6 +55,8 @@ class AnnotationsService:
                     q = q.filter(Annotation.date == date)
                 if area:
                     q = q.filter(Annotation.area == area)
+                if user_id:
+                    q = q.filter(Annotation.user_id == user_id)
                 rows = q.all()
                 return [{
                     'id': r.id,
@@ -63,6 +68,7 @@ class AnnotationsService:
                     'likes': r.likes,
                     'dislikes': r.dislikes,
                     'status': r.status,
+                    'user_id': getattr(r, 'user_id', None),
                 } for r in rows]
             except Exception:
                 # Fallback to JSON if DB fails
@@ -71,6 +77,8 @@ class AnnotationsService:
                     items = [a for a in items if a.get('date') == date]
                 if area:
                     items = [a for a in items if a.get('area') == area]
+                if user_id:
+                    items = [a for a in items if a.get('user_id') == user_id]
                 return items
         else:
             items = self._load()
@@ -78,13 +86,19 @@ class AnnotationsService:
                 items = [a for a in items if a.get('date') == date]
             if area:
                 items = [a for a in items if a.get('area') == area]
+            if user_id:
+                items = [a for a in items if a.get('user_id') == user_id]
             return items
 
-    def create(self, date, area, text, author='anonymous', hour=None):
-        """Create a new annotation"""
+    def create(self, date, area, text, author='anonymous', hour=None, user_id=None):
+        """Create a new annotation.
+
+        Adds optional user_id (UUID from cookie) to the stored annotation. Works
+        with both SQLAlchemy backend and JSON fallback.
+        """
         ann_id = str(uuid.uuid4())
         created_at = datetime.utcnow()
-        
+
         if self.use_db:
             try:
                 sess = get_session()
@@ -96,7 +110,9 @@ class AnnotationsService:
                     author=author,
                     likes=0,
                     dislikes=0,
-                    status='active'
+                    status='active',
+                    # if the model has a user_id column it will be set, otherwise ignored
+                    **({'user_id': user_id} if user_id is not None else {})
                 )
                 sess.add(a)
                 sess.commit()
@@ -110,11 +126,13 @@ class AnnotationsService:
                     'likes': a.likes,
                     'dislikes': a.dislikes,
                     'status': a.status,
+                    # include user_id if present on the model
+                    'user_id': getattr(a, 'user_id', None)
                 }
             except Exception:
                 # Fallback to JSON
                 pass
-        
+
         # JSON fallback
         ann = {
             'id': ann_id,
@@ -126,7 +144,8 @@ class AnnotationsService:
             'created_at': created_at.isoformat() + 'Z',
             'likes': 0,
             'dislikes': 0,
-            'status': 'active'
+            'status': 'active',
+            'user_id': user_id
         }
         items = self._load()
         items.append(ann)

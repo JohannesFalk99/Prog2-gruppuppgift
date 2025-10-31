@@ -35,15 +35,21 @@
        <div class="row g-2 mb-3">
          <div class="col-auto">
            <label class="form-label small">Date</label>
-           <input id="fetchDate" type="date" class="form-control form-control-sm" value="{{ (labels[0] if labels|length else '') }}">
+           {# prefer last_search cookie if present, otherwise fall back to labels[0] #}
+           {% if last_search and last_search.year and last_search.month and last_search.day %}
+             {% set last_date = last_search.year ~ '-' ~ last_search.month ~ '-' ~ last_search.day %}
+           {% else %}
+             {% set last_date = (labels[0] if labels|length else '') %}
+           {% endif %}
+           <input id="fetchDate" type="date" class="form-control form-control-sm" value="{{ last_date }}">
          </div>
          <div class="col-auto">
            <label class="form-label small">Area</label>
            <select id="prisklass" class="form-select form-select-sm">
-             <option value="SE1">SE1</option>
-             <option value="SE2">SE2</option>
-             <option value="SE3" selected>SE3</option>
-             <option value="SE4">SE4</option>
+             <option value="SE1" {% if last_search and last_search.prisklass == 'SE1' %}selected{% endif %}>SE1</option>
+             <option value="SE2" {% if last_search and last_search.prisklass == 'SE2' %}selected{% endif %}>SE2</option>
+             <option value="SE3" {% if not last_search or last_search.prisklass == 'SE3' %}selected{% endif %}>SE3</option>
+             <option value="SE4" {% if last_search and last_search.prisklass == 'SE4' %}selected{% endif %}>SE4</option>
            </select>
          </div>
          <div class="col-auto align-self-end">

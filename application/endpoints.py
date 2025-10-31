@@ -1,9 +1,14 @@
-from flask import request, Blueprint, jsonify, render_template, current_app, abort
+from flask import request, Blueprint, jsonify, render_template, current_app, abort, make_response, redirect, url_for
 from flask.views import MethodView 
 from pathlib import Path
 import json
 import uuid
 from functools import wraps 
+# admin helper
+try:
+    from .admin import get_admin_dashboard_data
+except Exception:
+    from admin import get_admin_dashboard_data
 
 try:
     # prefer package-relative import when running as a package
@@ -20,6 +25,12 @@ try:
 except Exception:
     # fallback for direct script runs
     from json_handler import JsonHandler
+
+try:
+    # prefer package-relative import when running as a package
+    from .cookie_manager import CookieManager
+except Exception:
+    from cookie_manager import CookieManager
 
 # Create blueprints
 route_blueprint = Blueprint('routes', __name__)
@@ -137,19 +148,27 @@ class ElpriserAPI(MethodView):
         labels, values, summary = ElpriserService.parse_raw_payload(priser)
 
         # if caller requested debug, include the raw persisted payload as well
+        payload = {"message": "Elpriser data fetched and stored successfully", "prisklass": prisklass, "labels": labels, "values": values, "summary": summary}
         if request.args.get('debug') in ('1', 'true', 'yes'):
             project_root = Path(__file__).resolve().parents[1]
             raw = ElpriserService.load_persisted(project_root)
-            return jsonify({
-                "message": "Elpriser data fetched and stored successfully (debug)",
-                "prisklass": prisklass,
-                "labels": labels,
-                "values": values,
-                "summary": summary,
-                "raw_persisted": raw,
-            }), 200
+            payload['raw_persisted'] = raw
 
-        return jsonify({"message": "Elpriser data fetched and stored successfully", "prisklass": prisklass, "labels": labels, "values": values, "summary": summary}), 200
+        # set last_search cookie so the UI (server-side) can prefill next time
+        try:
+            last_search = json.dumps({"year": year, "month": month, "day": day, "prisklass": prisklass})
+            # use CookieManager to set cookies with consistent settings
+            try:
+                cm = CookieManager()
+                resp = make_response(jsonify(payload), 200)
+                resp = cm._set_cookie(resp, 'last_search', last_search)
+                return resp
+            except Exception:
+                # fallback to plain JSON response if cookie-setting via manager fails
+                return jsonify(payload), 200
+        except Exception:
+            # fallback to plain JSON response if cookie-setting fails
+            return jsonify(payload), 200
 
 
 class ElpriserView(MethodView):
@@ -172,9 +191,29 @@ class ElpriserView(MethodView):
         date_str = f"{year}-{month}-{day}"
         area = request.args.get('prisklass') or request.args.get('area') or 'SE3'
         
+        # record a page view for this user (if DB available)
+        try:
+            cm = CookieManager()
+            cm.record_view()
+        except Exception:
+            pass
+        
         # Load elpriser data
         project_root = Path(__file__).resolve().parents[1]
         raw = ElpriserService.load_persisted(project_root)
+        # read server-side last_search cookie (if present) to prefill the UI
+        last_search = None
+        try:
+            cm = CookieManager()
+            raw_last = cm.get_cookie('last_search')
+        except Exception:
+            raw_last = request.cookies.get('last_search')
+        if raw_last:
+            try:
+                last_search = json.loads(raw_last)
+            except Exception:
+                last_search = None
+
         if not raw:
             return render_template('elpriser.html', 
                                  labels=[], 
@@ -182,20 +221,22 @@ class ElpriserView(MethodView):
                                  summary={}, 
                                  annotations=[],
                                  date=date_str,
-                                 area=area)
+                                 area=area,
+                                 last_search=last_search)
         
         labels, values, summary = ElpriserService.parse_raw_payload(raw)
         
         # Fetch annotations for this date and area
         annotations = get_annotations_service().list(date=date_str, area=area)
-        
+
         return render_template('elpriser.html', 
                              labels=labels, 
                              values=values, 
                              summary=summary,
                              annotations=annotations,
                              date=date_str,
-                             area=area)
+                             area=area,
+                             last_search=last_search)
 
 class ElpriserDataView(MethodView):
     """Serve the persisted elpriser_data.json"""
@@ -232,7 +273,19 @@ class AnnotationsAPI(MethodView):
 
         area = request.args.get('prisklass') or request.args.get('area')
 
-        items = get_annotations_service().list(date=date, area=area)
+        # Support optional filtering for annotations created by this user.
+        # If client requests ?mine=1 we will restrict results to the cookie user_id.
+        mine = request.args.get('mine') in ('1', 'true', 'yes')
+        try:
+            cm = CookieManager()
+            user_id = cm.get_user_id()
+        except Exception:
+            user_id = request.cookies.get('user_id')
+
+        if mine and user_id:
+            items = get_annotations_service().list(date=date, area=area, user_id=user_id)
+        else:
+            items = get_annotations_service().list(date=date, area=area)
         return jsonify({'annotations': items}), 200
 
     def post(self):
@@ -246,9 +299,28 @@ class AnnotationsAPI(MethodView):
         if not text or not date or not area:
             return jsonify({'error': 'Missing required fields: text, date, area'}), 422
 
-        ann = get_annotations_service().create(date=date, area=area, text=text, author=author)
+        # Attach cookie-based user id (UUID) if present so anonymous users can
+        # be tracked without explicit registration.
+        try:
+            cm = CookieManager()
+            user_id = cm.get_user_id()
+        except Exception:
+            user_id = request.cookies.get('user_id')
+        ann = get_annotations_service().create(date=date, area=area, text=text, author=author, user_id=user_id)
         if not ann:
             return jsonify({'error': 'Failed to persist annotation'}), 500
+        # If we have a user_id, increment the annotations_count on the CookieRecord
+        if user_id:
+            try:
+                from .models import CookieRecord, get_session
+                sess = get_session()
+                cr = sess.query(CookieRecord).filter(CookieRecord.user_id == user_id).one_or_none()
+                if cr:
+                    cr.annotations_count = (cr.annotations_count or 0) + 1
+                    sess.commit()
+            except Exception:
+                # ignore DB failures
+                pass
         return jsonify({'annotation': ann}), 201
 
 
@@ -315,6 +387,95 @@ def dashboard():
 def settings():
     return render_template('settings.html')
 
+
+# Admin: list cookie records
+from functools import wraps
+from flask import request, abort
+
+def require_admin(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        password = request.args.get("password") or request.cookies.get("admin_auth")
+        # Accept the simple dev password (kept for backwards compatibility)
+        if password == "123":
+            return f(*args, **kwargs)
+
+        # If the client likely expects HTML, redirect to a login page instead of aborting
+        accept = request.headers.get('Accept', '')
+        if request.method == 'GET' and ('text/html' in accept or '*/*' in accept or request.accept_mimetypes.accept_html):
+            return redirect(url_for('routes.admin_login', next=request.path))
+
+        # Default: abort with 403 for non-HTML clients
+        abort(403)
+    return decorated_function
+
+@route_blueprint.route('/admin/cookie-records')
+@require_admin
+def admin_cookie_records():
+    """Admin view to list persisted CookieRecord entries (if DB available)."""
+    try:
+        from .models import CookieRecord, get_session
+    except Exception:
+        try:
+            from models import CookieRecord, get_session
+        except Exception:
+            CookieRecord = None
+            get_session = None
+
+    records = []
+    if CookieRecord and get_session:
+        try:
+            sess = get_session()
+            qs = sess.query(CookieRecord).order_by(CookieRecord.created_at.desc()).all()
+            for r in qs:
+                records.append({
+                    'id': r.id,
+                    'user_id': r.user_id,
+                    'user_agent': r.user_agent,
+                    'accept_language': r.accept_language,
+                    'fingerprint_hash': r.fingerprint_hash,
+                    'created_at': r.created_at,
+                    'last_seen': getattr(r, 'last_seen', None)
+                })
+        except Exception:
+            # DB query failed; leave records empty and render message
+            records = []
+
+    return render_template('cookie_records.html', records=records)
+
+
+@route_blueprint.route('/admin')
+@require_admin
+def admin_dashboard():
+    """Admin dashboard route — delegate data collection to helper to keep route small."""
+    project_root = Path(__file__).resolve().parents[1]
+    data = get_admin_dashboard_data(project_root=project_root, limit=200)
+    return render_template('admin.html', **data)
+
+
+# Admin login page (simple password form for dev/demo)
+@route_blueprint.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    """Simple admin login to set an `admin_auth` cookie for the demo admin flow.
+
+    POST will set a cookie and redirect to `next` or `/admin` if the password matches.
+    """
+    error = None
+    if request.method == 'POST':
+        pwd = request.form.get('password') or request.args.get('password')
+        next_url = request.args.get('next') or request.form.get('next') or url_for('routes.admin_dashboard')
+        if pwd == '123':
+            resp = make_response(redirect(next_url))
+            # set cookie for a day (dev/demo)
+            resp.set_cookie('admin_auth', pwd, max_age=24*3600, httponly=True, samesite='Lax')
+            return resp
+        else:
+            error = 'Invalid password'
+
+    # GET (or failed POST) -> show login form
+    next_url = request.args.get('next')
+    return render_template('admin_login.html', error=error, next=next_url)
+
 # Optional: support function-based registration if preferred
 def register_routes(app):
     # bp is already registered by FlaskApp._register_blueprints()
@@ -333,3 +494,4 @@ def require_admin(f):
             abort(403)
         return f(*args, **kwargs)
     return decorated_function
+

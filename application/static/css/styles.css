@@ -1,3 +1,19 @@
+/* Annotations sidebar styles */
+.annotations-sidebar {
+  position: fixed;
+  top: 0;
+  right: -420px; /* hidden by default */
+  width: 420px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -8px 0 24px rgba(0,0,0,0.12);
+  z-index: 1050;
+  transition: right 240ms ease-in-out;
+  overflow-y: auto;
+}
+.annotations-sidebar.open { right: 0; }
+.annotations-header { border-bottom: 1px solid #e9ecef; }
+.annotations-content { min-height: 200px; }
 @charset "UTF-8";
 /*!
 * Start Bootstrap - SB Admin v7.0.7 (https://startbootstrap.com/template/sb-admin)

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<h1>Admin Dashboard</h1>
+		<div>
+			<small class="text-muted">Overview of users and activity</small>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div class="card mb-3">
+				<div class="card-body">
+					<h5 class="card-title">Statistics</h5>
+					<p class="mb-1">Cookie records: <strong>{{ stats.cookie_count }}</strong></p>
+					<p class="mb-1">Annotations: <strong>{{ stats.annotation_count }}</strong></p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div class="card mb-3">
+				<div class="card-body">
+					<h5 class="card-title">Recent Cookie Records</h5>
+					{% if records %}
+						<div class="table-responsive">
+							<table class="table table-sm table-striped">
+								<thead>
+									<tr>
+										<th>created_at</th>
+										<th>user_id</th>
+										<th>views</th>
+										<th>annotations</th>
+										<th>user_agent</th>
+										<th>fingerprint</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for r in records %}
+										<tr>
+											<td>{{ r.created_at }}</td>
+											<td>{{ r.user_id }}</td>
+											<td>{{ r.views or 0 }}</td>
+											<td>{{ r.annotations_count or 0 }}</td>
+											<td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ r.user_agent }}</td>
+											<td style="font-family:monospace">{{ r.fingerprint_hash }}</td>
+										</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+					{% else %}
+						<p class="text-muted">No cookie records available.</p>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="card">
+		<div class="card-body">
+			<h5 class="card-title">Recent Annotations</h5>
+			{% if annotations %}
+				<div class="table-responsive">
+					<table class="table table-sm table-striped">
+						<thead>
+							<tr>
+								<th>created_at</th>
+								<th>date</th>
+								<th>area</th>
+								<th>author</th>
+								<th>user_id</th>
+								<th>text</th>
+								<th>likes</th>
+								<th>dislikes</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for a in annotations %}
+								<tr>
+									<td>{{ a.created_at }}</td>
+									<td>{{ a.date }}</td>
+									<td>{{ a.area }}</td>
+									<td>{{ a.author }}</td>
+									<td>{{ a.user_id }}</td>
+									<td style="max-width:600px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ a.text }}</td>
+									<td>{{ a.likes or 0 }}</td>
+									<td>{{ a.dislikes or 0 }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			{% else %}
+				<p class="text-muted">No annotations found.</p>
+			{% endif %}
+		</div>
+	</div>
+
+{% endblock %}
