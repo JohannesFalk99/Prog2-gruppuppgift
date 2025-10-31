@@ -1,35 +1,35 @@
-import uuid
-from functools import wraps
-from flask import request, make_response, redirect, url_for, abort, current_app
-import hashlib
-from datetime import datetime
-
-
 def set_cookie(response, key, value, days_expire=7):
-    max_age = days_expire * 24 * 60 * 60
-    response.set_cookie(key, value, max_age=max_age, httponly=True, samesite="Lax")
-    return response
-
+    """Stub: implemented in app.py"""
+    pass
 
 def get_cookie(key):
-    return request.cookies.get(key)
-
+    """Stub: implemented in app.py"""
+    pass
 
 def delete_cookie(response, key):
-    response.delete_cookie(key)
-    return response
-
+    """Stub: implemented in app.py"""
+    pass
 
 def has_cookie_consent():
-    return request.cookies.get("consent") == "true"
-
+    """Stub: implemented in app.py"""
+    pass
 
 def accept_cookies():
-    """Sätt consent=true och en unik användar-ID-cookie.
+    """Stub: implemented in app.py"""
+    pass
 
-    Additionally attempt to persist a CookieRecord in the DB (if available).
-    This mirrors the production `CookieManager.accept_cookies()` behavior so
-    tests using this helper will exercise DB writes.
+def decline_cookies():
+    """Stub: implemented in app.py"""
+    pass
+
+def require_admin(f):
+    """Stub: implemented in app.py"""
+    pass
+
+def record_view():
+    """Stub: implemented in app.py"""
+    pass
+    
     """
     resp = make_response(redirect(url_for("index")))
     resp = set_cookie(resp, "consent", "true", days_expire=7)
@@ -40,7 +40,15 @@ def accept_cookies():
         resp = set_cookie(resp, "user_id", user_id, days_expire=7)
         # attempt to persist cookie acceptance and fingerprint to DB
         try:
-            from .models import CookieRecord, get_session
+            # Ensure DB/tables exist and import session
+            try:
+                from . import models as _models
+                _models.init_db()
+                from .models import CookieRecord, get_session
+            except Exception:
+                import models as _models
+                _models.init_db()
+                from models import CookieRecord, get_session
             ua = request.headers.get('User-Agent')
             al = request.headers.get('Accept-Language')
             fp_src = (ua or '') + '|' + (al or '')
@@ -87,7 +95,15 @@ def record_view():
         uid = get_cookie('user_id')
         if not uid:
             return
-        from .models import CookieRecord, get_session
+        # ensure DB/tables exist
+        try:
+            from . import models as _models
+            _models.init_db()
+            from .models import CookieRecord, get_session
+        except Exception:
+            import models as _models
+            _models.init_db()
+            from models import CookieRecord, get_session
         sess = get_session()
         cr = sess.query(CookieRecord).filter(CookieRecord.user_id == uid).one_or_none()
         if cr:

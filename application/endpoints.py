@@ -157,17 +157,21 @@ class ElpriserAPI(MethodView):
         # set last_search cookie so the UI (server-side) can prefill next time
         try:
             last_search = json.dumps({"year": year, "month": month, "day": day, "prisklass": prisklass})
-            # use CookieManager to set cookies with consistent settings
+            # Only persist last_search if the user has given cookie consent (GDPR)
             try:
                 cm = CookieManager()
-                resp = make_response(jsonify(payload), 200)
-                resp = cm._set_cookie(resp, 'last_search', last_search)
-                return resp
+                if cm.has_consent():
+                    resp = make_response(jsonify(payload), 200)
+                    resp = cm._set_cookie(resp, 'last_search', last_search)
+                    return resp
+                else:
+                    # Respect decline: do not set non-essential cookies
+                    return jsonify(payload), 200
             except Exception:
-                # fallback to plain JSON response if cookie-setting via manager fails
+                # fallback to plain JSON response if cookie manager fails
                 return jsonify(payload), 200
         except Exception:
-            # fallback to plain JSON response if cookie-setting fails
+            # fallback to plain JSON response if serialization fails
             return jsonify(payload), 200
 
 
@@ -276,11 +280,15 @@ class AnnotationsAPI(MethodView):
         # Support optional filtering for annotations created by this user.
         # If client requests ?mine=1 we will restrict results to the cookie user_id.
         mine = request.args.get('mine') in ('1', 'true', 'yes')
+        user_id = None
         try:
             cm = CookieManager()
-            user_id = cm.get_user_id()
+            # Only use cookie-derived user_id if consent given
+            if cm.has_consent():
+                user_id = cm.get_user_id()
         except Exception:
-            user_id = request.cookies.get('user_id')
+            # Fallback: do not use user_id unless explicit consent available
+            user_id = None
 
         if mine and user_id:
             items = get_annotations_service().list(date=date, area=area, user_id=user_id)
@@ -301,11 +309,13 @@ class AnnotationsAPI(MethodView):
 
         # Attach cookie-based user id (UUID) if present so anonymous users can
         # be tracked without explicit registration.
+        user_id = None
         try:
             cm = CookieManager()
-            user_id = cm.get_user_id()
+            if cm.has_consent():
+                user_id = cm.get_user_id()
         except Exception:
-            user_id = request.cookies.get('user_id')
+            user_id = None
         ann = get_annotations_service().create(date=date, area=area, text=text, author=author, user_id=user_id)
         if not ann:
             return jsonify({'error': 'Failed to persist annotation'}), 500
@@ -460,6 +470,11 @@ def admin_login():
 
     POST will set a cookie and redirect to `next` or `/admin` if the password matches.
     """
+    # If already authenticated, skip login and go to next
+    if request.cookies.get('admin_auth') == '123':
+        next_url = request.args.get('next') or url_for('routes.admin_dashboard')
+        return redirect(next_url)
+
     error = None
     if request.method == 'POST':
         pwd = request.form.get('password') or request.args.get('password')
@@ -475,6 +490,14 @@ def admin_login():
     # GET (or failed POST) -> show login form
     next_url = request.args.get('next')
     return render_template('admin_login.html', error=error, next=next_url)
+
+
+@route_blueprint.route('/admin/logout')
+def admin_logout():
+    """Clear admin cookie and redirect to the login page."""
+    resp = make_response(redirect(url_for('routes.admin_login')))
+    resp.delete_cookie('admin_auth')
+    return resp
 
 # Optional: support function-based registration if preferred
 def register_routes(app):

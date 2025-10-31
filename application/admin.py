@@ -59,6 +59,21 @@ def get_admin_dashboard_data(project_root: Path = None, limit: int = 200):
 
         svc = AnnotationsService(project_root, use_db=(get_session is not None))
         annotations = svc.list()
+        # Deduplicate annotations by id while preserving order. The JSON
+        # fallback may contain duplicate entries; avoid showing duplicates
+        # in the admin dashboard.
+        seen = set()
+        dedup = []
+        for a in annotations:
+            # some older records may not have 'id' set; fall back to text+created_at
+            aid = a.get('id') if isinstance(a, dict) else None
+            if not aid:
+                aid = (a.get('created_at') if isinstance(a, dict) else None) or a.get('text') if isinstance(a, dict) else None
+            if aid in seen:
+                continue
+            seen.add(aid)
+            dedup.append(a)
+        annotations = dedup
         stats['annotation_count'] = len(annotations)
     except Exception:
         # fallback: read annotations.json directly

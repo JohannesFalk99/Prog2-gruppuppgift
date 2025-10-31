@@ -3,6 +3,19 @@
 <div class="container-fluid px-4">
   <h1 class="mt-4">Elpriser</h1>
 
+  {% if not last_search %}
+    {# Show cookie prompt on first visit to elpriser if consent not given. last_search used as proxy for consent-prefill; better to check consent server-side. #}
+    {% if not request.cookies.get('consent') or request.cookies.get('consent') != 'true' %}
+      <div id="cookie-banner" style="position:fixed; bottom:0; left:0; right:0; background:#222; color:#fff; padding:12px; text-align:center; z-index:1000;">
+        <p style="margin:0;">Vi använder cookies för att ge dig en bättre upplevelse på Elpriser-sidan. Vill du acceptera?</p>
+        <div style="margin-top:8px;">
+          <a href="{{ url_for('accept_cookies') }}"><button class="btn btn-sm btn-light">Ja, acceptera</button></a>
+          <a href="{{ url_for('decline_cookies') }}"><button class="btn btn-sm btn-outline-light ms-2">Nej</button></a>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+
   <div class="row mb-3">
     <div class="col-md-4">
       <div class="card text-center">
