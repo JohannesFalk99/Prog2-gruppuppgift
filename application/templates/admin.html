@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<style>
+	.admin-table {
+		font-size: 0.875rem;
+	}
+
+	.admin-table th {
+		background-color: #f8f9fa;
+		border-top: none;
+		font-weight: 600;
+	}
+
+	.admin-table td {
+		vertical-align: middle;
+		padding: 0.5rem;
+	}
+
+	.truncate-text {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+</style>
+<div class="d-flex justify-content-between align-items-center mb-3">
+	<h1>Admin Dashboard</h1>
+	<div>
+		<small class="text-muted">Overview of users and activity</small>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-4">
+		<div class="card mb-3">
+			<div class="card-body">
+				<h5 class="card-title">Statistics</h5>
+				<p class="mb-1">Cookie records: <strong>{{ stats.cookie_count }}</strong></p>
+				<p class="mb-1">Annotations: <strong>{{ stats.annotation_count }}</strong></p>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-8">
+		<div class="card mb-3">
+			<div class="card-body">
+				<h5 class="card-title">Recent Cookie Records</h5>
+				{% if records %}
+				<div class="table-responsive">
+					<table class="table table-sm table-striped admin-table">
+						<thead>
+							<tr>
+								<th style="width:150px;">Created</th>
+								<th style="width:80px;">User ID</th>
+								<th style="width:60px;">Views</th>
+								<th style="width:80px;">Annotations</th>
+								<th style="width:250px;">User Agent</th>
+								<th style="width:120px;">Fingerprint</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for r in records %}
+							<tr>
+								<td class="text-nowrap">
+									{% if r.created_at %}
+									{{ r.created_at[:19] if r.created_at is string else r.created_at.strftime('%Y-%m-%d
+									%H:%M') if r.created_at else 'N/A' }}
+									{% else %}
+									N/A
+									{% endif %}
+								</td>
+								<td title="{{ r.user_id_full or r.user_id }}"
+									style="cursor:help; font-family:monospace;">{{ r.user_id }}</td>
+								<td class="text-center">{{ r.views or 0 }}</td>
+								<td class="text-center">{{ r.annotations_count or 0 }}</td>
+								<td title="{{ r.user_agent_full or r.user_agent }}" class="truncate-text"
+									style="cursor:help; max-width:200px;">{{ r.user_agent }}</td>
+								<td title="{{ r.fingerprint_full or r.fingerprint_hash }}"
+									style="font-family:monospace; cursor:help; font-size:0.8rem;">{{ r.fingerprint_hash
+									}}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				{% else %}
+				<p class="text-muted">No cookie records available.</p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="card">
+	<div class="card-body">
+		<h5 class="card-title">Recent Annotations</h5>
+		{% if annotations %}
+		<div class="table-responsive">
+			<table class="table table-sm table-striped">
+				<thead>
+					<tr>
+						<th>created_at</th>
+						<th>date</th>
+						<th>area</th>
+						<th>author</th>
+						<th>user_id</th>
+						<th>text</th>
+						<th>likes</th>
+						<th>dislikes</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for a in annotations %}
+					<tr>
+						<td>{{ a.created_at }}</td>
+						<td>{{ a.date }}</td>
+						<td>{{ a.area }}</td>
+						<td>{{ a.author }}</td>
+						<td>{{ a.user_id }}</td>
+						<td style="max-width:600px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{
+							a.text }}</td>
+						<td>{{ a.likes or 0 }}</td>
+						<td>{{ a.dislikes or 0 }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{% else %}
+		<p class="text-muted">No annotations found.</p>
+		{% endif %}
+	</div>
+</div>
+
+{% endblock %}

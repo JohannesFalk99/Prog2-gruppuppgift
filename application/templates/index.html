@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Elpriser - Index{% endblock %}
+
+{% block content %}
+
+{% if not consent %}
+<!-- Cookie-banner -->
+<div id="cookie-banner" style="position:fixed; bottom:0; left:0; right:0;
+       background:#222; color:#fff; padding:15px; text-align:center; z-index:1000;">
+  <p>Vi använder cookies för att ge dig en bättre upplevelse. Vill du acceptera?</p>
+  <a href="{{ url_for('accept_cookies_route') }}">
+    <button style="margin:0 10px;">Ja, acceptera</button>
+  </a>
+  <a href="{{ url_for('decline_cookies_route') }}">
+    <button style="margin:0 10px;">Nej</button>
+  </a>
+</div>
+{% else %}
+<!-- Visa användarens ID om cookies är accepterade -->
+<div class="alert alert-info mt-3">
+  <strong>Ditt unika ID:</strong> {{ user_id }}
+</div>
+{% endif %}
+
+<div class="container-fluid px-4">
+  <h1 class="mt-4">Elpriser</h1>
+
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Medelpris</h6>
+          <h3 id="avgPrice">-</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Här kan du lägga resten av din UI för att välja datum, prisklass osv -->
+  <div class="row">
+    <div class="col-md-12">
+      <canvas id="priceChart"></canvas>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function fetchAndRender(date, prisklass) {
+    showStatus('Loading...', 'loading');
+    let trigger;
+    try {
+      trigger = await fetch('/fetch_elpriser' +
+        `?year=${encodeURIComponent(date.split('-')[0])}&month=${encodeURIComponent(date.split('-')[1])}&day=${encodeURIComponent(date.split('-')[2])}&prisklass=${encodeURIComponent(prisklass)}`,
+        { method: 'GET' });
+    } catch (e) {
+      showStatus('Network error while fetching prices.', 'error');
+      return;
+    }
+    if (!trigger.ok) {
+      const err = await trigger.json().catch(() => ({}));
+      showStatus('Failed to refresh data: ' + (err.error || trigger.statusText), 'error');
+      return;
+    }
+    const mainJson = await trigger.json();
+    const labels = mainJson.labels || [];
+    const values = mainJson.values || [];
+    const summary = mainJson.summary || {};
+    const ds1 = buildDataset(`${prisklass} ${date}`, 'rgb(29,233,182)', values);
+
+    updateChart(labels, [ds1]);
+    updateSummary(summary);
+    showStatus('', '');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const dateEl = document.getElementById('fetchDate');
+    const areaEl = document.getElementById('prisklass');
+
+    function debounce(fn, wait) {
+      let t = null;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+    }
+
+    const autoFetch = debounce(() => {
+      const date = dateEl?.value;
+      const area = areaEl?.value;
+      if (!date) return;
+      fetchAndRender(date, area);
+    }, 200);
+
+    dateEl?.addEventListener('change', autoFetch);
+    areaEl?.addEventListener('change', autoFetch);
+
+    autoFetch();
+  });
+</script>
+{% endblock %}

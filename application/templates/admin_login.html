@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Login{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card mt-5">
+        <div class="card-body">
+          <h3 class="card-title">Admin login</h3>
+          {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+          {% endif %}
+          <form method="post">
+            {% if next %}
+              <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input id="password" name="password" class="form-control" type="password" required>
+            </div>
+            <div>
+              <button class="btn btn-primary" type="submit">Sign in</button>
+              <a class="btn btn-link" href="/">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

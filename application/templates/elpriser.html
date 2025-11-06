@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid px-4">
+  <h1 class="mt-4">Elpriser</h1>
+
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Medelpris</h6>
+          <h3 id="avgPrice">{{ summary.avg if summary.avg is not none else '-' }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Minpris</h6>
+          <h3 id="minPrice">{{ summary.min if summary.min is not none else '-' }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Maxpris</h6>
+          <h3 id="maxPrice">{{ summary.max if summary.max is not none else '-' }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+       <div class="row g-2 mb-3">
+         <div class="col-auto">
+           <label class="form-label small">Date</label>
+           {# prefer last_search cookie if present, otherwise fall back to labels[0] #}
+           {% if last_search and last_search.year and last_search.month and last_search.day %}
+             {% set last_date = last_search.year ~ '-' ~ last_search.month ~ '-' ~ last_search.day %}
+           {% else %}
+             {% set last_date = (labels[0] if labels|length else '') %}
+           {% endif %}
+           <input id="fetchDate" type="date" class="form-control form-control-sm" value="{{ last_date }}">
+         </div>
+         <div class="col-auto">
+           <label class="form-label small">Area</label>
+           <select id="prisklass" class="form-select form-select-sm">
+             <option value="SE1" {% if last_search and last_search.prisklass == 'SE1' %}selected{% endif %}>SE1</option>
+             <option value="SE2" {% if last_search and last_search.prisklass == 'SE2' %}selected{% endif %}>SE2</option>
+             <option value="SE3" {% if not last_search or last_search.prisklass == 'SE3' %}selected{% endif %}>SE3</option>
+             <option value="SE4" {% if last_search and last_search.prisklass == 'SE4' %}selected{% endif %}>SE4</option>
+           </select>
+         </div>
+         <div class="col-auto align-self-end">
+           <button id="btnFetch" class="btn btn-sm btn-primary">Fetch</button>
+         </div>
+       </div>
+
+         <canvas id="elpriserChart" height="120"></canvas>
+
+        <!-- Annotations card -->
+        <div class="mt-3 card">
+          <div class="card-body">
+            <h6>Annotations</h6>
+            <div class="row g-2 mb-2">
+              <div class="col-md-4">
+                <label class="form-label small">Hour (optional)</label>
+                <select id="annotationHour" class="form-select form-select-sm">
+                  <option value="">(no specific hour)</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small">Your name</label>
+                <input id="annotationAuthor" class="form-control form-control-sm" placeholder="anonymous">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small">&nbsp;</label>
+                <button id="btnAddAnnotation" class="btn btn-sm btn-outline-primary w-100">Add Annotation</button>
+              </div>
+            </div>
+            <div class="mb-2">
+              <textarea id="annotationText" class="form-control form-control-sm" rows="2" placeholder="Add note about this date or a specific hour..."></textarea>
+            </div>
+
+            <div id="annotationsList" class="list-group mt-2">
+              <!-- annotations will be injected here -->
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Display Annotations Section -->
+  <!-- <div id="annotations-section"> -->
+  <!--     <h3>Annotations for {{ date }} - {{ area }}</h3> -->
+      
+  <!--     <!-- Add New Annotation Form --> -->
+  <!--     <form id="add-annotation-form"> -->
+  <!--         <textarea id="annotation-text" placeholder="Add your annotation..." required></textarea> -->
+  <!--         <input type="text" id="annotation-author" placeholder="Your name (optional)"> -->
+  <!--         <button type="submit">Add Annotation</button> -->
+  <!--     </form> -->
+      
+  <!--     <!-- Display Existing Annotations --> -->
+  <!--     <div id="annotations-list"> -->
+  <!--         {% for ann in annotations %} -->
+  <!--         <div class="annotation" data-id="{{ ann.id }}"> -->
+  <!--             <p><strong>{{ ann.author }}:</strong> {{ ann.text }}</p> -->
+  <!--             <small>{{ ann.created_at }}</small> -->
+  <!--             <div class="votes"> -->
+  <!--                 <button class="vote-btn" data-vote="like">👍 {{ ann.likes }}</button> -->
+  <!--                 <button class="vote-btn" data-vote="dislike">👎 {{ ann.dislikes }}</button> -->
+  <!--             </div> -->
+  <!--             {% if ann.status == 'warning' %} -->
+  <!--             <span class="warning">⚠️ Warning</span> -->
+  <!--             {% elif ann.status == 'removed' %} -->
+  <!--             <span class="removed">🚫 Removed</span> -->
+  <!--             {% endif %} -->
+  <!--         </div> -->
+  <!--         {% endfor %} -->
+  <!--     </div> -->
+  <!-- </div> -->
+</div>
+
+<!-- Chart.js (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const labels = {{ labels|tojson }};
+
+const values = {{ values|tojson }};
+
+console.log('Elpriser data:', { labels, values });
+const ctx = document.getElementById('elpriserChart').getContext('2d');
+if (window.elpriserChart && typeof window.elpriserChart.destroy === 'function') {
+  window.elpriserChart.destroy();
+}
+window.elpriserChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Elpris (öre/kWh)',
+      data: values,
+      borderColor: '#1de9b6',
+      backgroundColor: 'rgba(29,233,182,0.08)',
+      fill: true,
+      tension: 0.2,
+      pointRadius: 3
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: false
+      }
+    }
+  }
+});
+
+// helper to update chart with new data
+function updateChart(newLabels, newValues) {
+  if (!window.elpriserChart) return;
+  window.elpriserChart.data.labels = newLabels;
+  window.elpriserChart.data.datasets[0].data = newValues;
+  // reset point styles to default; annotations renderer will update them
+  window.elpriserChart.data.datasets[0].pointBackgroundColor = new Array(newValues.length).fill('#1de9b6');
+  window.elpriserChart.update();
+}
+
+
+// Unified fetch and render function
+async function fetchAndRender() {
+  const date = document.getElementById('fetchDate').value;
+  const prisklass = document.getElementById('prisklass').value;
+  if (!date) {
+    // Optionally, clear chart/summary if no date
+    updateChart([], []);
+    document.getElementById('avgPrice').textContent = '-';
+    document.getElementById('minPrice').textContent = '-';
+    document.getElementById('maxPrice').textContent = '-';
+    return;
+  }
+  const [year, month, day] = date.split('-');
+  try {
+    const qs = `?year=${encodeURIComponent(year)}&month=${encodeURIComponent(month)}&day=${encodeURIComponent(day)}&prisklass=${encodeURIComponent(prisklass)}`;
+    const res = await fetch('/fetch_elpriser' + qs, { method: 'GET' });
+    const json = await res.json();
+    if (!res.ok) {
+      alert('Fetch failed: ' + (json.error || JSON.stringify(json)));
+      return;
+    }
+    let newLabels = json.labels || [];
+    let newValues = json.values || [];
+    // if the API returned empty payload, try loading persisted file as fallback
+    if ((!newLabels || newLabels.length === 0) && (!newValues || newValues.length === 0)) {
+      try {
+        const r2 = await fetch('/elpriser_data.json');
+        if (r2.ok) {
+          const raw = await r2.json();
+          // normalize payload like server: look for raw.data (list) or raw.hours or raw itself
+          let items = [];
+          if (raw && Array.isArray(raw.data)) items = raw.data;
+          else if (Array.isArray(raw)) items = raw;
+          else if (raw && Array.isArray(raw.hours)) items = raw.hours;
+
+          const parsedLabels = [];
+          const parsedValues = [];
+          for (const item of items) {
+            let h = null;
+            let p = null;
+            if (item && typeof item === 'object') {
+              h = item.time_start || item.time || item.start || item.date || item.t || item.hour;
+              p = item.SEK_per_kWh || item.price || item.value || item.spot_price || item.SpotPrice;
+            } else {
+              p = item;
+            }
+            let label = '';
+            if (h) {
+              try { label = new Date(h).toISOString().slice(11,16); } catch(e) { label = String(h); }
+            } else {
+              label = String(parsedLabels.length);
+            }
+            let val = null;
+            try { if (p !== null && p !== undefined && p !== '') val = parseFloat(p) * 100.0; } catch(e) { val = null; }
+            if (val !== null && !isNaN(val)) {
+              parsedLabels.push(label);
+              parsedValues.push(Math.round(val*100)/100);
+            }
+          }
+          if (parsedLabels.length && parsedValues.length) {
+            newLabels = parsedLabels;
+            newValues = parsedValues;
+          }
+        }
+      } catch (e) {
+        console.warn('Fallback load of persisted elpriser_data.json failed', e);
+      }
+    }
+    updateChart(newLabels, newValues);
+    const summary = json.summary || {};
+    document.getElementById('avgPrice').textContent = (summary.avg !== undefined && summary.avg !== null) ? summary.avg : '-';
+    document.getElementById('minPrice').textContent = (summary.min !== undefined && summary.min !== null) ? summary.min : '-';
+    document.getElementById('maxPrice').textContent = (summary.max !== undefined && summary.max !== null) ? summary.max : '-';
+  // populate hour selector for annotations
+  populateHourSelector(json.labels || []);
+  // fetch and render annotations for this date/area
+  await fetchAndRenderAnnotations(date, prisklass, json.labels || []);
+  } catch (err) {
+    console.error(err);
+    alert('Network error while fetching');
+  }
+}
+
+// Auto-fetch on page load
+window.addEventListener('DOMContentLoaded', () => {
+  // if no date selected (template may not provide), default to today
+  const dateInput = document.getElementById('fetchDate');
+  if (!dateInput.value) {
+    const d = new Date();
+    const iso = d.toISOString().slice(0,10);
+    dateInput.value = iso;
+  }
+  fetchAndRender();
+});
+
+// Auto-fetch on date or area change
+document.getElementById('fetchDate').addEventListener('change', fetchAndRender);
+document.getElementById('prisklass').addEventListener('change', fetchAndRender);
+
+// Manual fetch button (optional, still available)
+document.getElementById('btnFetch').addEventListener('click', fetchAndRender);
+
+
+// ---------------- Annotations frontend ----------------
+function populateHourSelector(labels) {
+  const sel = document.getElementById('annotationHour');
+  // clear existing except first
+  sel.innerHTML = '<option value="">(no specific hour)</option>';
+  labels.forEach(l => {
+    const opt = document.createElement('option');
+    opt.value = l;
+    opt.textContent = l;
+    sel.appendChild(opt);
+  });
+}
+
+async function fetchAnnotations(date, area) {
+  if (!date) return [];
+  const qs = `?date=${encodeURIComponent(date)}&prisklass=${encodeURIComponent(area)}`;
+  try {
+    const res = await fetch('/annotations' + qs);
+    if (!res.ok) return [];
+    const j = await res.json();
+    return j.annotations || [];
+  } catch (e) {
+    console.error('Failed to fetch annotations', e);
+    return [];
+  }
+}
+
+async function fetchAndRenderAnnotations(date, area, labels) {
+  const anns = await fetchAnnotations(date, area);
+  renderAnnotationsList(anns);
+  // highlight points on the chart for annotations that specify an hour
+  const pointColors = new Array((labels || []).length).fill('#1de9b6');
+  anns.forEach(a => {
+    if (!a) return;
+    const hour = a.hour || a.label || a.time || a.hour_label || a.label_text || null;
+    // also support storing the hour in the 'hour' field or matching 'text' tokens
+    const matchLabel = a.hour || a.label || a.time || a.hour_label;
+    if (matchLabel) {
+      const idx = (labels || []).indexOf(matchLabel);
+      if (idx >= 0) {
+        // choose color based on status
+        if (a.status === 'removed') pointColors[idx] = '#6c757d';
+        else if (a.status === 'warning') pointColors[idx] = '#ffc107';
+        else pointColors[idx] = '#ff6b6b';
+      }
+    }
+  });
+  // apply to chart
+  if (window.elpriserChart) {
+    window.elpriserChart.data.datasets[0].pointBackgroundColor = pointColors;
+    window.elpriserChart.update();
+  }
+}
+
+function renderAnnotationsList(annotations) {
+  const container = document.getElementById('annotationsList');
+  container.innerHTML = '';
+  if (!annotations || annotations.length === 0) {
+    container.innerHTML = '<div class="text-muted small">No annotations for this date/area.</div>';
+    return;
+  }
+
+  annotations.forEach(a => {
+    const item = document.createElement('div');
+    item.className = 'list-group-item d-flex justify-content-between align-items-start';
+    const left = document.createElement('div');
+    left.className = 'ms-2 me-auto';
+    const h5 = document.createElement('div');
+    h5.className = 'fw-bold';
+    h5.textContent = `${a.author || 'anonymous'} ${a.hour ? '(' + a.hour + ')' : ''}`;
+    const p = document.createElement('div');
+    p.textContent = a.text || a.note || a.comment || '';
+    left.appendChild(h5);
+    left.appendChild(p);
+
+    const right = document.createElement('div');
+    right.className = 'text-end';
+    const counts = document.createElement('div');
+    counts.className = 'small text-muted';
+    counts.textContent = `👍 ${a.likes || 0}  👎 ${a.dislikes || 0}`;
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'btn-group btn-group-sm mt-1';
+    const likeBtn = document.createElement('button');
+    likeBtn.className = 'btn btn-outline-success';
+    likeBtn.textContent = 'Like';
+    likeBtn.addEventListener('click', () => voteAnnotation(a.id, 'like'));
+    const dislikeBtn = document.createElement('button');
+    dislikeBtn.className = 'btn btn-outline-danger';
+    dislikeBtn.textContent = 'Dislike';
+    dislikeBtn.addEventListener('click', () => voteAnnotation(a.id, 'dislike'));
+    btnGroup.appendChild(likeBtn);
+    btnGroup.appendChild(dislikeBtn);
+
+    if (a.status === 'warning') {
+      const warn = document.createElement('div');
+      warn.className = 'small text-warning';
+      warn.textContent = 'Marked as questionable';
+      right.appendChild(warn);
+    } else if (a.status === 'removed') {
+      const rem = document.createElement('div');
+      rem.className = 'small text-muted';
+      rem.textContent = 'Removed due to community feedback';
+      right.appendChild(rem);
+      // dim the text
+      item.style.opacity = '0.6';
+    }
+
+    right.appendChild(counts);
+    right.appendChild(btnGroup);
+
+    item.appendChild(left);
+    item.appendChild(right);
+    container.appendChild(item);
+  });
+}
+
+async function voteAnnotation(id, vote) {
+  try {
+    const res = await fetch(`/annotations/${encodeURIComponent(id)}/vote`, {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({vote})});
+    if (!res.ok) {
+      const j = await res.json().catch(()=>({}));
+      alert('Vote failed: ' + (j.error || res.statusText));
+      return;
+    }
+    // refresh annotations for current selection
+    const date = document.getElementById('fetchDate').value;
+    const prisklass = document.getElementById('prisklass').value;
+    const labels = window.elpriserChart ? window.elpriserChart.data.labels : [];
+    await fetchAndRenderAnnotations(date, prisklass, labels);
+  } catch (e) {
+    console.error('Vote error', e);
+  }
+}
+
+// Add annotation handler
+document.getElementById('btnAddAnnotation').addEventListener('click', async () => {
+  const date = document.getElementById('fetchDate').value;
+  const area = document.getElementById('prisklass').value;
+  const author = document.getElementById('annotationAuthor').value || 'anonymous';
+  const text = document.getElementById('annotationText').value || '';
+  const hour = document.getElementById('annotationHour').value || null;
+  if (!date || !text) {
+    alert('Please choose a date and enter text for the annotation');
+    return;
+  }
+  const payload = {date, area, author, text};
+  if (hour) payload.hour = hour;
+  try {
+    const res = await fetch('/annotations', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    if (!res.ok) {
+      const j = await res.json().catch(()=>({}));
+      alert('Failed to add annotation: ' + (j.error || res.statusText));
+      return;
+    }
+    // clear form
+    document.getElementById('annotationText').value = '';
+    document.getElementById('annotationAuthor').value = '';
+    document.getElementById('annotationHour').value = '';
+    // refresh annotations
+    const labels = window.elpriserChart ? window.elpriserChart.data.labels : [];
+    await fetchAndRenderAnnotations(date, area, labels);
+  } catch (e) {
+    console.error('Add annotation error', e);
+  }
+});
+</script>
+{% endblock %}

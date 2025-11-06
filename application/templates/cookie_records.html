@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Cookie Records{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>Cookie Records</h1>
+  {% if records %}
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User ID</th>
+            <th>User Agent</th>
+            <th>Accept-Language</th>
+            <th>Fingerprint</th>
+            <th>Created</th>
+            <th>Last Seen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+          <tr>
+            <td>{{ r.id }}</td>
+            <td>{{ r.user_id }}</td>
+            <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis;">{{ r.user_agent }}</td>
+            <td>{{ r.accept_language }}</td>
+            <td style="font-family:monospace;">{{ r.fingerprint_hash }}</td>
+            <td>{{ r.created_at }}</td>
+            <td>{{ r.last_seen }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p>No cookie records available.</p>
+  {% endif %}
+</div>
+{% endblock %}

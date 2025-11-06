@@ -1,0 +1,57 @@
+[
+  {
+    "id": "eed871b2-d7d6-4e3d-9a0e-dc3f8cf837bd",
+    "user_id": "1ecc563d-bf58-4c49-84ac-41b54933c1fc",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
+    "accept_language": "en-US,en;q=0.9",
+    "fingerprint_hash": "5fe67c5cfab0e2e52dd274247740c1472bd0e6f8f8811596d4e6cf610aef2bf2",
+    "created_at": "2025-11-04T08:32:43.687615",
+    "last_seen": "2025-11-04T08:47:21.090964",
+    "views": 5,
+    "annotations_count": 0
+  },
+  {
+    "id": "09cb8753-8ae2-4df7-994f-a321a14939b6",
+    "user_id": "5ae38e26-5076-429f-8b6c-a67643ba7ffc",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
+    "accept_language": "en-US,en;q=0.9",
+    "fingerprint_hash": "5fe67c5cfab0e2e52dd274247740c1472bd0e6f8f8811596d4e6cf610aef2bf2",
+    "created_at": "2025-11-04T08:48:01.775402",
+    "last_seen": "2025-11-06T21:26:31.688634",
+    "views": 15,
+    "annotations_count": 0
+  },
+  {
+    "id": "f5d2920c-8845-4199-a571-a67799f943dc",
+    "user_id": "9c66aba3-2cb2-45fe-b92c-d129d1ba026b",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.105.1 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36",
+    "accept_language": "en-US",
+    "fingerprint_hash": "61af41ee66ff0b69c6f87091d7c2a880d8bf1d1c105722a7db8e8d2ed77131b1",
+    "created_at": "2025-11-04T09:19:52.892535",
+    "last_seen": "2025-11-04T09:19:52.892556",
+    "views": 1,
+    "annotations_count": 0
+  },
+  {
+    "id": "c55190dc-1a8b-4d7f-9ec0-1a472ea6c31f",
+    "user_id": "690eaf5a-61b9-463d-886d-11913c7685a8",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.105.1 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36",
+    "accept_language": "en-US",
+    "fingerprint_hash": "61af41ee66ff0b69c6f87091d7c2a880d8bf1d1c105722a7db8e8d2ed77131b1",
+    "created_at": "2025-11-04T09:20:13.147475",
+    "last_seen": "2025-11-04T09:20:13.147490",
+    "views": 1,
+    "annotations_count": 0
+  },
+  {
+    "id": "321f1fe5-a020-4e9f-98a2-1a0c92a3116e",
+    "user_id": "4ef1d7b4-e6fd-4ddf-8b04-705f48bc927b",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.105.1 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36",
+    "accept_language": "en-US",
+    "fingerprint_hash": "61af41ee66ff0b69c6f87091d7c2a880d8bf1d1c105722a7db8e8d2ed77131b1",
+    "created_at": "2025-11-04T09:20:14.616192",
+    "last_seen": "2025-11-04T09:20:14.616202",
+    "views": 1,
+    "annotations_count": 0
+  }
+]
