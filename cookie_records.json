@@ -53,5 +53,16 @@
     "last_seen": "2025-11-04T09:20:14.616202",
     "views": 1,
     "annotations_count": 0
+  },
+  {
+    "id": "df18960f-e824-465b-8334-3bee5d0882f1",
+    "user_id": "ad81872a-f894-4ae3-bf70-6b2a82adabfe",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0",
+    "accept_language": "en-US,en;q=0.5",
+    "fingerprint_hash": "c6e89b0631b3da5439fa82798ff88fdd26c975dffa704ac7b0b6e4ebd85f507f",
+    "created_at": "2025-11-06T22:37:13.029731",
+    "last_seen": "2025-11-06T22:41:03.622789",
+    "views": 12,
+    "annotations_count": 0
   }
 ]

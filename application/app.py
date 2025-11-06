@@ -86,8 +86,11 @@ class FlaskApp:
                 cookie_manager.record_view()
             except Exception:
                 pass
-            from flask import render_template
-            return render_template("index.html", consent=consent, user_id=user_id)
+            # Instead of rendering the elpriser template here (which expects
+            # labels/values/summary etc.), redirect to the canonical elpriser
+            # route so the existing ElpriserView can build the full context.
+            from flask import redirect, url_for
+            return redirect(url_for('routes.elpriser_view'))
 
         # Register all cookie routes via CookieManager
         CookieManager.register_routes(self.app)
